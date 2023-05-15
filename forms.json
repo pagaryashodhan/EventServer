@@ -1,0 +1,17 @@
+{
+    "team_name": "Name",
+    "members": [
+        {
+            "email": "email_id",
+            "gaming_id": "gaming_id"
+        },
+        {
+            "email": "email_id",
+            "gaming_id": "gaming_id"
+        },
+        {
+            "email": "email_id",
+            "gaming_id": "gaming_id"
+        }
+    ]
+}

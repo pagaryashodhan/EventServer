@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Roles {
+  core
+  participant
+  admin
+  superadmin
+}
+
+model User {
+  id                 String        @id @default(auto()) @map("_id") @db.ObjectId
+  email              String        @unique
+  first_name         String
+  last_name          String
+  college            String        @default("PCCOE")
+  branch             String
+  mobile             Int
+  password           String
+  city               String?
+  state              String?
+  year               Int
+  image_url          String?
+  referal            Int           @default(0)
+  //Relations
+  certificates       Certificate[]
+  payment_history    Payment[]
+  roles              Roles         @default(participant)
+  registeredEventsId String[]      @db.ObjectId
+  registeredEvents   Event[]       @relation(fields: [registeredEventsId], references: [id], name: "registerdEvents")
+  eventId            String?       @db.ObjectId
+  EventVolunteer     Event?        @relation(name: "EventVolunteers", fields: [eventId], references: [id])
+  EventCoordinator   Event?        @relation(name: "EventCoordinator", fields: [eventId], references: [id])
+  EventLead          Event[]       @relation(name: "EventLead")
+  CategoryLead       Event[]       @relation(name: "CategoryLead")
+}
+
+model Event {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  registration_fee Int
+  startDate        DateTime
+  endDate          DateTime
+  rulebookUrl      String
+  venue            String
+  description      String
+  posterUrl        String
+  data             Json[]
+  videoUrl         String?
+  volunteerIds     String[] @db.ObjectId
+  coordinatorId    String[] @db.ObjectId
+  eventLeadId      String[] @db.ObjectId
+  teamSize         Int      @default(1)
+  faq_url          String?
+  whatsapp_url     String?
+  // timeTable should be google doc
+
+  //Relations
+  volunteers     User[]   @relation(name: "EventVolunteers")
+  coordinator    User[]   @relation(name: "EventCoordinator")
+  eventLead      User?    @relation(name: "EventLead", fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  categoryLead   User?    @relation(name: "CategoryLead", fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  participants   User[]   @relation(fields: [participantsId], references: [id], name: "registerdEvents")
+  participantsId String[] @db.ObjectId
+  userId         String?  @db.ObjectId
+}
+
+model Certificate {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  position  String
+  eventName String
+  User      User?   @relation(fields: [userId], references: [id])
+  userId    String? @db.ObjectId
+}
+
+model Payment {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  amount        Int
+  transactionId String
+  eventName     String
+  paymentDate   String
+  paymentMode   String
+  teams         String[]
+  college       String[]
+  User          User?    @relation(fields: [userId], references: [id])
+  userId        String?  @db.ObjectId
+}
